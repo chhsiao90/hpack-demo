@@ -3,6 +3,7 @@ import sys
 from hpack import Encoder, Decoder
 import json
 import struct
+import glob
 
 
 def header_dict_to_tuple(header):
@@ -93,6 +94,7 @@ class Demo(object):
     def run(self, headers):
         origin_len = 0
         encoded_len = 0
+        print "=" * 16
         for header in headers:
             header_tuple = header_dict_to_tuple(header)
             encoded = self.encoder.encode([header_tuple])
@@ -115,6 +117,7 @@ class Demo(object):
             self.decoder.decode(encoded)
             print
         print "Decompressed from {0} to {1}".format(origin_len, encoded_len)
+        print "=" * 16
 
     def pretty_print_table(self, table):
         for (k, v) in table.dynamic_entries:
@@ -145,9 +148,25 @@ class StoryRunner(object):
                 self.demo.tables()
 
 
-def main():
-    with open(sys.argv[1], "r") as f:
+def select_story():
+    pathes = [
+        path for path in glob.glob("./hpack-test-case/raw-data/*.json")
+    ]
+    print "select a story: "
+    for i, path in enumerate(pathes):
+        print "{0:2}. {1}".format(i, path)
+    select = raw_input(":")
+    with open(pathes[int(select)], "r") as f:
         story = json.load(f)
+    return story
+
+
+def main():
+    if len(sys.argv) == 2:
+        with open(sys.argv[1], "r") as f:
+            story = json.load(f)
+    else:
+        story = select_story()
     StoryRunner(story).run()
 
 
