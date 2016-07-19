@@ -23,7 +23,7 @@ python demo.py
 - Deocder will set up dynamic table if new key-value received
 
 ## Core object on hpack
-##### Encoder and Decoder
+#### Encoder and Decoder
 - Encoder crompressed the original header into binary format
 - Decoder decompressed the binary format message back to original header
 - Each server and client have one encoder and one decoder
@@ -32,12 +32,12 @@ python demo.py
     - Server->Encoder => Client->Decoder
 - Encoder and Decoder is stateful because it contains a dynamic table
 
-##### Static Table
+#### Static Table
 - A list of key-value pair
 - It's hardcode and fixed
 - All decoder and encoder had one static table
 
-##### Dynamic Table
+#### Dynamic Table
 - A list of key-value pair
 - Used to cache header content had been used
 - Each decoder and encoder had one dynamic table
@@ -45,11 +45,53 @@ python demo.py
 - Client decoder's dynamic table will same as server encoder's dynamic table
 
 ## In binary
-##### First byte
-- 1XXXXXXX: 
-- 01XXXXXX:
-- 0000XXXX:
-- 0001XXXX:
+#### First byte
+- 1XXXXXXX: Indexd Header
+- 01XXXXXX: Literal Header with Indexing
+- 0000XXXX: Literal Header without Indexing
+- 0001XXXX: Literal Header never Indexing
+
+#### Indexing
+**Get Index Value**
+- Convert the remain bits of first byte to integer.
+- If all of the remain bits of first byte is 1, add next bytes till the byte that contains 0
+
+**Index = 0**
+- No entry in static table or dynamic table
+- following content would be Name
+
+**0 < Index <= 61**
+- Has entry in static table
+- following content would be value
+
+**Index > 61**
+- Has entry in dynamic table
+- following content would be value
+
+#### Length
+- Summarize every byte till the byte that contains 0
+
+#### Name
+**First Bit**  
+- 1 = Huffman  
+- 0 = Non-Huffman
+
+**Get Length**  
+- Check Length Block
+
+**Following Bytes**  
+- Following Length bytes is the name
+
+#### Value
+**First Bit**  
+- 1 = Huffman  
+- 0 = Non-Huffman  
+
+**Get Length**  
+- Check Length Block
+
+**Following Bytes**  
+- Following Length bytes is the value
 
 ## Screenshot
 ![gif](http://i.imgur.com/2LcmrO2.gif)
